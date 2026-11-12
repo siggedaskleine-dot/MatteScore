@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Fixture, isFinished, isLive } from '../api/types';
 import { countryFlag, countryName } from '../countries';
@@ -61,6 +61,7 @@ interface Group {
 
 function LeagueBlock({ g, initiallyOpen }: { g: Group; initiallyOpen: boolean }) {
   const [open, setOpen] = useState(initiallyOpen);
+  useEffect(() => setOpen(initiallyOpen), [initiallyOpen]);
   const fav = useFavorites();
   const starred = !!fav.leagues[g.league.id];
   return (

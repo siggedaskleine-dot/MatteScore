@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { getFixturesByDate, isoDate } from '../../api/endpoints';
 import { isLive } from '../../api/types';
 import { DateStrip } from '../../components/DateStrip';
@@ -14,6 +14,7 @@ import { useAsync } from '../../useAsync';
 export default function AllMatches() {
   const [date, setDate] = useState(isoDate(new Date()));
   const [search, setSearch] = useState<string | null>(null);
+  const [expandAll, setExpandAll] = useState(false);
   const isToday = date === isoDate(new Date());
   const { data, error, loading, reload } = useAsync(() => getFixturesByDate(date), [date], isToday ? 60000 : undefined);
 
@@ -48,7 +49,7 @@ export default function AllMatches() {
         </View>
       )}
       <ScrollView refreshControl={<RefreshControl refreshing={loading && !!data} onRefresh={reload} />}>
-        <View style={styles.allRow}>
+        <Pressable style={styles.allRow} onPress={() => setExpandAll((e) => !e)}>
           <Ionicons name="list" size={26} color={colors.text} />
           <Text style={styles.allText}>Alla matcher</Text>
           {liveCount > 0 && (
@@ -57,7 +58,8 @@ export default function AllMatches() {
             </View>
           )}
           <Text style={styles.total}>{data?.length ?? '–'}</Text>
-        </View>
+          <Ionicons name={expandAll ? 'chevron-up' : 'chevron-down'} size={18} color="#9CA3AF" style={{ marginLeft: 6 }} />
+        </Pressable>
         {error && !data ? (
           <ErrorView message={error} onRetry={reload} />
         ) : !data ? (
@@ -65,7 +67,7 @@ export default function AllMatches() {
         ) : filtered.length === 0 ? (
           <Empty text={search ? 'Inga träffar' : 'Inga matcher den här dagen'} />
         ) : (
-          <LeagueSections fixtures={filtered} expandAll={!!search} />
+          <LeagueSections fixtures={filtered} expandAll={expandAll || !!search} />
         )}
       </ScrollView>
     </View>
