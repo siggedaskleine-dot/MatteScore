@@ -1,0 +1,55 @@
+name: Bygg Android-APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Installera beroenden
+        run: npm ci
+
+      - name: Typkontroll
+        run: npx tsc --noEmit
+
+      - name: Skapa Android-projekt
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Bygg APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+
+      - name: Döp om APK
+        run: cp android/app/build/outputs/apk/release/app-release.apk MatteScore.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MatteScore-apk
+          path: MatteScore.apk
+
+      - name: Publicera som release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: MatteScore build ${{ github.run_number }}
+          body: Ladda ner MatteScore.apk på din Android-telefon och installera den.
+          files: MatteScore.apk
+          make_latest: true
