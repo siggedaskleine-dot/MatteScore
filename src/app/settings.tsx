@@ -55,9 +55,9 @@ export default function Settings() {
           <Text style={styles.help}>Läge just nu: {isDemo() ? 'demo (påhittad data)' : 'riktig data'}</Text>
         </View>
         <View style={styles.card}>
-          <Text style={styles.label}>Om gratisplanen</Text>
+          <Text style={styles.label}>Om anrop</Text>
           <Text style={styles.help}>
-            Gratisplanen ger 100 anrop per dygn. Appen sparar svar i telefonen så att samma sak inte hämtas två gånger i onödan. Antal anrop kvar visas uppe i hörnet.
+            Din plan hos api-football har en dygnsgräns för anrop. Appen sparar svar i telefonen så att samma sak inte hämtas två gånger i onödan. Antal anrop kvar idag visas uppe i hörnet.
           </Text>
           <Pressable onPress={() => Linking.openURL('https://dashboard.api-football.com')}>
             <Text style={{ color: colors.accent, fontWeight: '700' }}>Öppna api-football dashboard</Text>

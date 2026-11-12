@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { getTeamStats, getTeamXg, PlayedMatch, Split, SplitStats, TeamStats } from '../../api/endpoints';
 import { Fixture } from '../../api/types';
@@ -199,21 +199,25 @@ export function Analysis({ f }: { f: Fixture }) {
     away: { value: null, loading: false, done: false },
   });
 
+  useEffect(() => {
+    if (!data) return;
+    let cancelled = false;
+    (['home', 'away'] as const).forEach((side, i) => {
+      setXg((s) => ({ ...s, [side]: { value: null, loading: true, done: false } }));
+      getTeamXg(data[i])
+        .then((v) => !cancelled && setXg((s) => ({ ...s, [side]: { value: v, loading: false, done: true } })))
+        .catch(() => !cancelled && setXg((s) => ({ ...s, [side]: { value: null, loading: false, done: true } })));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [data]);
+
   if (error && !data) return <ErrorView message={error} onRetry={reload} />;
   if (!data) return <Loading />;
   const [home, away] = data;
   const stats = team === 'home' ? home : away;
   const name = f.teams[team].name;
-
-  const loadXg = async () => {
-    setXg((s) => ({ ...s, [team]: { value: null, loading: true, done: false } }));
-    try {
-      const v = await getTeamXg(stats);
-      setXg((s) => ({ ...s, [team]: { value: v, loading: false, done: true } }));
-    } catch {
-      setXg((s) => ({ ...s, [team]: { value: null, loading: false, done: true } }));
-    }
-  };
 
   return (
     <View>
@@ -252,11 +256,6 @@ export function Analysis({ f }: { f: Fixture }) {
           ))}
         </View>
         <StatsTable stats={stats} highlight={team === 'home' ? 'home' : 'away'} xg={xg[team]} />
-        {!xg[team].value && !xg[team].loading && !xg[team].done && (
-          <Pressable onPress={loadXg} style={styles.xgBtn}>
-            <Text style={styles.xgBtnText}>Hämta xG/xGA för {name} (5 API-anrop)</Text>
-          </Pressable>
-        )}
         <Insight name={name} stats={stats} />
       </View>
     </View>
