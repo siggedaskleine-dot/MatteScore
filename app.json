@@ -23,11 +23,18 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "output": "single"
+      "output": "single",
+      "name": "MatteScore",
+      "shortName": "MatteScore",
+      "themeColor": "#0F1B2D",
+      "backgroundColor": "#0F1B2D"
     },
     "plugins": [
       "expo-router",
       "expo-font"
-    ]
+    ],
+    "experiments": {
+      "baseUrl": "/MatteScore"
+    }
   }
 }

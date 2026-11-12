@@ -35,7 +35,7 @@ jobs:
 
       - name: Bygg APK
         working-directory: android
-        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a
 
       - name: Döp om APK
         run: cp android/app/build/outputs/apk/release/app-release.apk MatteScore.apk
@@ -53,3 +53,29 @@ jobs:
           body: Ladda ner MatteScore.apk på din Android-telefon och installera den.
           files: MatteScore.apk
           make_latest: true
+
+  web:
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Bygg webbversion
+        run: |
+          npx expo export --platform web --output-dir dist
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - id: deploy
+        uses: actions/deploy-pages@v4
