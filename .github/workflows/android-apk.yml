@@ -55,6 +55,7 @@ jobs:
           make_latest: true
 
   web:
+    needs: apk
     runs-on: ubuntu-latest
     permissions:
       pages: write
@@ -74,6 +75,10 @@ jobs:
           npx expo export --platform web --output-dir dist
           cp dist/index.html dist/404.html
           touch dist/.nojekyll
+      - uses: actions/download-artifact@v4
+        with:
+          name: MatteScore-apk
+          path: dist
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
